@@ -165,6 +165,12 @@ class Event
             return;
         }
 
+        if ($name == 'rrule') {
+            $this->setRecurrenceRule($value);
+
+            return;
+        }
+
         Arr::set($this->googleEvent, $name, $value);
     }
 
