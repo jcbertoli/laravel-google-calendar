@@ -307,6 +307,13 @@ class Event
         $this->googleEvent->setColorId($id);
     }
 
+    public function setRecurrenceRule($recurrence)
+    {
+        $this->googleEvent->setRecurrence([$recurrence]);
+
+        return $this;
+    }
+
     protected function getFieldName(string $name): string
     {
         return [
