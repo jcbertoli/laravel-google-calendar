@@ -29,6 +29,11 @@ class GoogleCalendar
         return $this->calendarId;
     }
 
+    public function listInstances(string $eventId)
+    {
+        return $this->calendarService->events->instances($this->calendarId, $eventId);
+    }
+
     /*
      * @link https://developers.google.com/google-apps/calendar/v3/reference/events/list
      */
@@ -90,6 +95,15 @@ class GoogleCalendar
         }
 
         return $this->calendarService->events->update($this->calendarId, $event->id, $event, $optParams);
+    }
+
+    public function patchEvent($event, $optParams = []): Google_Service_Calendar_Event
+    {
+        if ($event instanceof Event) {
+            $event = $event->googleEvent;
+        }
+
+        return $this->calendarService->events->patch($this->calendarId, $event->id, $event, $optParams);
     }
 
     public function deleteEvent($eventId, $optParams = [])

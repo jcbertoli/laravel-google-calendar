@@ -171,7 +171,13 @@ class Event
             return;
         }
 
-        Arr::set($this->googleEvent, $name, $value);
+        $method = 'set' . ucfirst(Str::camel($name));
+
+        if (method_exists($this->googleEvent, $method)) {
+            $this->googleEvent->$method($value);
+        } else {
+            $this->googleEvent->$name = $value;
+        }
     }
 
     public function exists(): bool
@@ -217,9 +223,25 @@ class Event
         return $this->save('updateEvent', $optParams);
     }
 
+    public function patch(array $attributes, $optParams = []): self
+    {
+        foreach ($attributes as $name => $value) {
+            $this->{$name} = $value;
+        }
+
+        return $this->save('patchEvent', $optParams);
+    }
+
     public function delete(?string $eventId = null, $optParams = [])
     {
         $this->getGoogleCalendar($this->calendarId)->deleteEvent($eventId ?? $this->id, $optParams);
+    }
+
+    public function listInstances()
+    {
+        $googleCalendar = $this->getGoogleCalendar($this->calendarId);
+
+        return $googleCalendar->listInstances($this->googleEvent->id);
     }
 
     public function addAttendee(array $attendee)
