@@ -335,9 +335,43 @@ class Event
         $this->googleEvent->setColorId($id);
     }
 
-    public function setRecurrenceRule($recurrence)
+    public function setRecurrenceRule(string $recurrence): self
     {
-        $this->googleEvent->setRecurrence([$recurrence]);
+        $exdate = Arr::first($this->googleEvent->getRecurrence(), fn($item) => Str::startsWith($item, 'EXDATE'));
+
+        $this->googleEvent->setRecurrence(array_merge([$recurrence], [$exdate] ?? []));
+
+        return $this;
+    }
+
+    /**
+     * Dates must be RFC5545-compliant
+     * 
+     * @param array $exdate
+     * 
+     * @return $this
+     */
+    public function addExdate(array $exdate, ?string $timezone = 'UTC'): self
+    {
+        if (empty($exdate)) {
+            return $this;
+        }
+
+        $recurrence = $this->googleEvent->getRecurrence() ?? [];
+
+        $exdates = Arr::first($recurrence, fn($item) => Str::startsWith($item, 'EXDATE'));
+
+        $existingExdates = [];
+        if ($exdates) {
+            $existingExdates = explode(',', explode(':', $exdates)[1]);
+        }
+
+        $mergedExdates = array_unique(array_merge($existingExdates, $exdate));
+        $exdateString = sprintf('EXDATE;TZID=%s:%s', $timezone, implode(',', $mergedExdates));
+
+        array_merge($recurrence, [$exdateString]);
+
+        $this->googleEvent->setRecurrence($recurrence);
 
         return $this;
     }
@@ -350,6 +384,7 @@ class Event
             'endDate' => 'end.date',
             'startDateTime' => 'start.dateTime',
             'endDateTime' => 'end.dateTime',
+            'rrule' => 'recurrence',
         ][$name] ?? $name;
     }
 }
