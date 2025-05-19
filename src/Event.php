@@ -337,7 +337,7 @@ class Event
 
     public function setRecurrenceRule(string $recurrence): self
     {
-        $exdate = Arr::first($this->googleEvent->getRecurrence(), fn($item) => Str::startsWith($item, 'EXDATE'));
+        $exdate = Arr::first($this->googleEvent->getRecurrence() ?? [], fn($item) => Str::startsWith($item, 'EXDATE'));
 
         $this->googleEvent->setRecurrence(array_merge([$recurrence], [$exdate] ?? []));
 
@@ -384,7 +384,6 @@ class Event
             'endDate' => 'end.date',
             'startDateTime' => 'start.dateTime',
             'endDateTime' => 'end.dateTime',
-            'rrule' => 'recurrence',
         ][$name] ?? $name;
     }
 }
