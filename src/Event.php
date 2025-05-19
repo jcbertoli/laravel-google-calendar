@@ -369,7 +369,7 @@ class Event
         $mergedExdates = array_unique(array_merge($existingExdates, $exdate));
         $exdateString = sprintf('EXDATE;TZID=%s:%s', $timezone, implode(',', $mergedExdates));
 
-        array_merge($recurrence, [$exdateString]);
+        $recurrence = array_merge($recurrence, [$exdateString]);
 
         $this->googleEvent->setRecurrence($recurrence);
 
