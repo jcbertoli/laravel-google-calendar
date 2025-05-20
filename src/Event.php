@@ -171,6 +171,12 @@ class Event
             return;
         }
 
+        if ($name == 'exdate') {
+            $this->setExdate($value);
+
+            return;
+        }
+
         $method = 'set' . ucfirst(Str::camel($name));
 
         if (method_exists($this->googleEvent, $method)) {
@@ -372,6 +378,22 @@ class Event
         $recurrence = array_merge($recurrence, [$exdateString]);
 
         $this->googleEvent->setRecurrence($recurrence);
+
+        return $this;
+    }
+
+    public function setExdate(array $exdate, ?string $timezone = 'UTC'): self
+    {
+        if (empty($exdate)) {
+            return $this;
+        }
+
+        $recurrence = $this->googleEvent->getRecurrence() ?? [];
+        $recurrence = array_filter($recurrence, fn($item) => !Str::startsWith($item, 'EXDATE'));
+
+        $exdateString = sprintf('EXDATE;TZID=%s:%s', $timezone, implode(',', $exdate));
+
+        $this->googleEvent->setRecurrence(array_merge($recurrence, [$exdateString]));
 
         return $this;
     }
